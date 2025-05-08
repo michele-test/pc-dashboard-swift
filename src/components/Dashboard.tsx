@@ -1,16 +1,20 @@
 
 import { useState } from "react";
 import { useHardwareData } from "@/hooks/useHardwareData";
+import { useDemoData } from "@/hooks/useDemoData";
 import HardwareCard from "@/components/HardwareCard";
 import ConnectionStatus from "@/components/ConnectionStatus";
 import SettingsPanel from "@/components/SettingsPanel";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import { SettingsState } from "@/types/hardware";
 import { formatFanSpeed } from "@/utils/formatters";
-import { SettingsIcon, RefreshCw } from "lucide-react";
+import { SettingsIcon, RefreshCw, AlertTriangle } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
   const [settings, setSettings] = useState<SettingsState>({
     serverAddress: "http://192.168.1.100:5000/data", // Default server address
     refreshRate: 1000, // Default refresh rate (1 second)
@@ -30,21 +34,46 @@ const Dashboard = () => {
     }
   });
   
-  const { 
-    data, 
-    isLoading, 
-    isError, 
-    lastUpdated,
-    refetch
-  } = useHardwareData({
+  // Utilizzo dati reali o di demo
+  const realData = useHardwareData({
     serverAddress: settings.serverAddress,
     refreshRate: settings.refreshRate,
-    isEnabled: true
+    isEnabled: !demoMode
   });
+
+  const demoData = useDemoData(settings.refreshRate);
+  
+  // Utilizziamo i dati appropriati in base alla modalità
+  const { data, isLoading, isError, lastUpdated, refetch } = demoMode ? demoData : realData;
+
+  // Funzione per attivare la modalità demo
+  const enableDemoMode = () => {
+    setDemoMode(true);
+    toast({
+      title: "Modalità Demo attivata",
+      description: "Stai visualizzando dati simulati per scopi dimostrativi."
+    });
+  };
+
+  // Funzione per disattivare la modalità demo
+  const disableDemoMode = () => {
+    setDemoMode(false);
+    refetch();
+    toast({
+      title: "Modalità Demo disattivata",
+      description: "Tentativo di connessione al server reale."
+    });
+  };
 
   // Function to handle manual refresh
   const handleRefresh = () => {
-    refetch();
+    if (demoMode) {
+      // In modalità demo, aggiorniamo solo la data di ultimo aggiornamento
+      refetch();
+    } else {
+      // In modalità normale, tentativo di connessione
+      refetch();
+    }
   };
 
   // Function to save settings
@@ -82,6 +111,18 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold">PC Monitor</h1>
           
           <div className="flex space-x-2">
+            {demoMode && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={disableDemoMode}
+                className="bg-amber-500/20 border-amber-500 text-amber-500"
+              >
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Demo
+              </Button>
+            )}
+            
             <Button 
               variant="outline" 
               size="icon"
@@ -103,11 +144,20 @@ const Dashboard = () => {
 
         <ConnectionStatus 
           isConnected={!isError && !!data} 
-          serverAddress={settings.serverAddress}
+          serverAddress={demoMode ? "Demo Mode" : settings.serverAddress}
           lastUpdated={lastUpdated}
+          isDemoMode={demoMode}
         />
 
-        {isError ? (
+        {demoMode && (
+          <Alert className="bg-amber-500/10 border-amber-500 text-amber-500 mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle className="ml-2">Modalità Demo Attiva</AlertTitle>
+            <p className="text-sm ml-6 mt-1">Stai visualizzando dati simulati. I dati non rappresentano il tuo hardware reale.</p>
+          </Alert>
+        )}
+
+        {isError && !demoMode ? (
           <div className="flex flex-col items-center justify-center p-8 rounded-lg card-glass">
             <p className="text-red-DEFAULT text-xl mb-4">
               Impossibile connettersi al server
@@ -116,15 +166,23 @@ const Dashboard = () => {
               Verifica che il server Python sia in esecuzione all'indirizzo specificato
               e che sia accessibile dalla tua rete.
             </p>
-            <Button onClick={handleRefresh}>
-              Riprova
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button onClick={handleRefresh}>
+                Riprova
+              </Button>
+              <Button 
+                onClick={enableDemoMode}
+                variant="outline"
+              >
+                Visualizza Modalità Demo
+              </Button>
+            </div>
           </div>
         ) : !data ? (
           <div className="flex items-center justify-center p-8 rounded-lg card-glass">
             <div className="text-center">
               <p className="text-muted-foreground mb-2">
-                Connessione al server in corso...
+                {demoMode ? "Generazione dati demo in corso..." : "Connessione al server in corso..."}
               </p>
               <div className="flex justify-center space-x-2">
                 <div className="pulse-dot bg-blue-DEFAULT"></div>
@@ -207,6 +265,8 @@ const Dashboard = () => {
         setOpen={setSettingsOpen}
         settings={settings}
         onSaveSettings={handleSaveSettings}
+        isDemoMode={demoMode}
+        onToggleDemoMode={() => setDemoMode(!demoMode)}
       />
     </div>
   );
