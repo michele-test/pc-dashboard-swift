@@ -8,7 +8,8 @@ import {
   Clock, 
   Zap,
   Gauge,
-  MemoryStick
+  MemoryStick,
+  BellRing
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -24,13 +25,17 @@ interface HardwareCardProps {
   value: string | number;
   type: "cpu_temp" | "gpu_temp" | "ram_usage" | "fan_speed" | "uptime" | "power_draw" | "cpu_usage" | "gpu_usage";
   className?: string;
+  isAlert?: boolean;
+  alertThreshold?: number;
 }
 
 const HardwareCard: React.FC<HardwareCardProps> = ({ 
   title, 
   value, 
   type,
-  className 
+  className,
+  isAlert = false,
+  alertThreshold
 }) => {
   // Determine if we need a progress bar
   const showProgress = ["cpu_usage", "gpu_usage"].includes(type);
@@ -72,27 +77,56 @@ const HardwareCard: React.FC<HardwareCardProps> = ({
     }
   };
 
+  // Apply alert styles for the card if in alert state
+  const cardClass = cn(
+    "card-glass rounded-xl p-4 flex flex-col h-full",
+    isAlert && "animate-pulse border-2 border-red-DEFAULT bg-red-DEFAULT/10",
+    className
+  );
+
   return (
-    <div className={cn(
-      "card-glass rounded-xl p-4 flex flex-col h-full",
-      className
-    )}>
-      <div className="flex items-center space-x-2">
-        <span className="text-primary">{getIcon()}</span>
-        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+    <div className={cardClass}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <span className={cn("text-primary", isAlert && "text-red-DEFAULT")}>
+            {getIcon()}
+          </span>
+          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+        </div>
+        {isAlert && (
+          <div className="text-red-DEFAULT">
+            <BellRing className="h-5 w-5 animate-pulse" />
+          </div>
+        )}
       </div>
       
       <div className="mt-2">
         <div className="flex items-baseline justify-between">
-          <span className={cn("text-2xl font-bold", valueColorClass)}>
+          <span className={cn(
+            "text-2xl font-bold", 
+            isAlert ? "text-red-DEFAULT" : valueColorClass
+          )}>
             {formattedValue}
           </span>
+          {alertThreshold && type.includes("temp") && (
+            <span className="text-xs text-muted-foreground">
+              Soglia: {alertThreshold}°C
+            </span>
+          )}
+          {alertThreshold && type.includes("usage") && (
+            <span className="text-xs text-muted-foreground">
+              Soglia: {alertThreshold}%
+            </span>
+          )}
         </div>
         
         {showProgress && (
           <div className="mt-2 progress-bar-bg">
             <div 
-              className={cn("progress-bar-fill", getProgressBarColorClass(progressValue))}
+              className={cn(
+                "progress-bar-fill", 
+                isAlert ? "bg-red-DEFAULT" : getProgressBarColorClass(progressValue)
+              )}
               style={{ width: `${progressValue}%` }}
             />
           </div>

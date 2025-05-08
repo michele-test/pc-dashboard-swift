@@ -26,7 +26,8 @@ import {
   ServerIcon,
   LayoutGrid,
   Paintbrush,
-  AlertTriangle
+  AlertTriangle,
+  BellRing
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
@@ -83,7 +84,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </SheetHeader>
 
         <Tabs defaultValue="connection" className="mt-6">
-          <TabsList className="grid grid-cols-3 mb-4">
+          <TabsList className="grid grid-cols-4 mb-4">
             <TabsTrigger value="connection" className="flex items-center gap-2">
               <ServerIcon className="h-4 w-4" />
               <span className="hidden sm:inline">Connessione</span>
@@ -91,6 +92,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <TabsTrigger value="metrics" className="flex items-center gap-2">
               <LayoutGrid className="h-4 w-4" />
               <span className="hidden sm:inline">Metriche</span>
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="flex items-center gap-2">
+              <BellRing className="h-4 w-4" />
+              <span className="hidden sm:inline">Allarmi</span>
             </TabsTrigger>
             <TabsTrigger value="appearance" className="flex items-center gap-2">
               <Paintbrush className="h-4 w-4" />
@@ -241,6 +246,127 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     onCheckedChange={() => handleMetricToggle("gpu_usage")}
                   />
                   <Label htmlFor="gpu-usage">Utilizzo GPU</Label>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* New Alerts Tab */}
+          <TabsContent value="alerts" className="space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="alerts-enabled" 
+                  checked={tempSettings.alerts?.enabled ?? false}
+                  onCheckedChange={(checked) => setTempSettings(prev => ({
+                    ...prev,
+                    alerts: {
+                      ...prev.alerts!,
+                      enabled: !!checked
+                    }
+                  }))}
+                />
+                <Label htmlFor="alerts-enabled">Attiva allarmi</Label>
+              </div>
+              
+              <div className="pt-4 space-y-4">
+                <h3 className="text-sm font-medium">Soglie di allarme</h3>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cpu-temp-threshold">Temperatura CPU: {tempSettings.alerts?.cpu_temp ?? 70}°C</Label>
+                    <Slider 
+                      id="cpu-temp-threshold"
+                      min={50}
+                      max={95}
+                      step={1}
+                      disabled={!tempSettings.alerts?.enabled}
+                      value={[tempSettings.alerts?.cpu_temp ?? 70]}
+                      onValueChange={(values) => setTempSettings(prev => ({
+                        ...prev,
+                        alerts: {
+                          ...prev.alerts!,
+                          cpu_temp: values[0]
+                        }
+                      }))}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="gpu-temp-threshold">Temperatura GPU: {tempSettings.alerts?.gpu_temp ?? 80}°C</Label>
+                    <Slider 
+                      id="gpu-temp-threshold"
+                      min={60}
+                      max={100}
+                      step={1}
+                      disabled={!tempSettings.alerts?.enabled}
+                      value={[tempSettings.alerts?.gpu_temp ?? 80]}
+                      onValueChange={(values) => setTempSettings(prev => ({
+                        ...prev,
+                        alerts: {
+                          ...prev.alerts!,
+                          gpu_temp: values[0]
+                        }
+                      }))}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="cpu-usage-threshold">Utilizzo CPU: {tempSettings.alerts?.cpu_usage ?? 95}%</Label>
+                    <Slider 
+                      id="cpu-usage-threshold"
+                      min={50}
+                      max={100}
+                      step={1}
+                      disabled={!tempSettings.alerts?.enabled}
+                      value={[tempSettings.alerts?.cpu_usage ?? 95]}
+                      onValueChange={(values) => setTempSettings(prev => ({
+                        ...prev,
+                        alerts: {
+                          ...prev.alerts!,
+                          cpu_usage: values[0]
+                        }
+                      }))}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="gpu-usage-threshold">Utilizzo GPU: {tempSettings.alerts?.gpu_usage ?? 95}%</Label>
+                    <Slider 
+                      id="gpu-usage-threshold"
+                      min={50}
+                      max={100}
+                      step={1}
+                      disabled={!tempSettings.alerts?.enabled}
+                      value={[tempSettings.alerts?.gpu_usage ?? 95]}
+                      onValueChange={(values) => setTempSettings(prev => ({
+                        ...prev,
+                        alerts: {
+                          ...prev.alerts!,
+                          gpu_usage: values[0]
+                        }
+                      }))}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="ram-usage-threshold">Utilizzo RAM: {tempSettings.alerts?.ram_usage ?? 90}%</Label>
+                    <Slider 
+                      id="ram-usage-threshold"
+                      min={50}
+                      max={100}
+                      step={1}
+                      disabled={!tempSettings.alerts?.enabled}
+                      value={[tempSettings.alerts?.ram_usage ?? 90]}
+                      onValueChange={(values) => setTempSettings(prev => ({
+                        ...prev,
+                        alerts: {
+                          ...prev.alerts!,
+                          ram_usage: values[0]
+                        }
+                      }))}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

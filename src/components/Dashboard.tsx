@@ -11,6 +11,7 @@ import { SettingsState } from "@/types/hardware";
 import { formatFanSpeed } from "@/utils/formatters";
 import { SettingsIcon, RefreshCw, AlertTriangle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { checkAlerts } from "@/utils/alertUtils";
 
 const Dashboard = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -31,6 +32,14 @@ const Dashboard = () => {
     appearance: {
       theme: "dark",
       accentColor: "#1ABC9C"
+    },
+    alerts: {
+      enabled: true,
+      cpu_temp: 70,
+      gpu_temp: 80,
+      ram_usage: 90,
+      cpu_usage: 95,
+      gpu_usage: 95
     }
   });
   
@@ -46,6 +55,11 @@ const Dashboard = () => {
   // Utilizziamo i dati appropriati in base alla modalità
   const { data, isLoading, isError, lastUpdated, refetch } = demoMode ? demoData : realData;
 
+  // Check for alerts when data changes
+  if (data && settings.alerts.enabled) {
+    checkAlerts(data, settings.alerts);
+  }
+  
   // Funzione per attivare la modalità demo
   const enableDemoMode = () => {
     setDemoMode(true);
@@ -198,6 +212,8 @@ const Dashboard = () => {
                 title="Temperatura CPU"
                 value={data.cpu_temp}
                 type="cpu_temp"
+                isAlert={settings.alerts.enabled && Number(data.cpu_temp) >= settings.alerts.cpu_temp}
+                alertThreshold={settings.alerts.cpu_temp}
               />
             )}
             
@@ -206,6 +222,8 @@ const Dashboard = () => {
                 title="Temperatura GPU"
                 value={data.gpu_temp}
                 type="gpu_temp"
+                isAlert={settings.alerts.enabled && Number(data.gpu_temp) >= settings.alerts.gpu_temp}
+                alertThreshold={settings.alerts.gpu_temp}
               />
             )}
             
@@ -214,6 +232,8 @@ const Dashboard = () => {
                 title="Utilizzo CPU"
                 value={data.cpu_usage}
                 type="cpu_usage"
+                isAlert={settings.alerts.enabled && Number(data.cpu_usage) >= settings.alerts.cpu_usage}
+                alertThreshold={settings.alerts.cpu_usage}
               />
             )}
             
@@ -222,6 +242,8 @@ const Dashboard = () => {
                 title="Utilizzo GPU"
                 value={data.gpu_usage}
                 type="gpu_usage"
+                isAlert={settings.alerts.enabled && Number(data.gpu_usage) >= settings.alerts.gpu_usage}
+                alertThreshold={settings.alerts.gpu_usage}
               />
             )}
             
@@ -230,6 +252,10 @@ const Dashboard = () => {
                 title="Utilizzo RAM"
                 value={data.ram_usage}
                 type="ram_usage"
+                isAlert={settings.alerts.enabled && 
+                  typeof data.ram_usage === 'number' && 
+                  data.ram_usage >= settings.alerts.ram_usage}
+                alertThreshold={settings.alerts.ram_usage}
               />
             )}
             

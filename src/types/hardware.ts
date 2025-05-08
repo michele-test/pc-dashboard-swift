@@ -1,8 +1,9 @@
 
+// Hardware data structure received from the server
 export interface HardwareData {
   cpu_temp: number;
   gpu_temp: number;
-  ram_usage: string;
+  ram_usage: string | number;
   fan_speed: number;
   uptime: string;
   power_draw: string;
@@ -10,6 +11,7 @@ export interface HardwareData {
   gpu_usage: number;
 }
 
+// Application settings
 export interface SettingsState {
   serverAddress: string;
   refreshRate: number;
@@ -24,8 +26,16 @@ export interface SettingsState {
     gpu_usage: boolean;
   };
   appearance: {
-    theme: 'dark' | 'light';
+    theme: 'light' | 'dark';
     accentColor: string;
     customBackground?: string;
+  };
+  alerts: {
+    enabled: boolean;
+    cpu_temp: number;
+    gpu_temp: number;
+    ram_usage: number;
+    cpu_usage: number;
+    gpu_usage: number;
   };
 }
