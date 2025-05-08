@@ -25,7 +25,8 @@ import {
   Undo2,
   ServerIcon,
   LayoutGrid,
-  Paintbrush
+  Paintbrush,
+  AlertTriangle
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
@@ -34,13 +35,17 @@ interface SettingsPanelProps {
   setOpen: (open: boolean) => void;
   settings: SettingsState;
   onSaveSettings: (settings: SettingsState) => void;
+  isDemoMode?: boolean;
+  onToggleDemoMode?: () => void;
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({
   open,
   setOpen,
   settings,
-  onSaveSettings
+  onSaveSettings,
+  isDemoMode = false,
+  onToggleDemoMode
 }) => {
   const [tempSettings, setTempSettings] = useState<SettingsState>(settings);
 
@@ -129,6 +134,36 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 Una frequenza più alta potrebbe impattare le prestazioni
               </p>
             </div>
+            
+            {/* Demo Mode Toggle */}
+            {onToggleDemoMode && (
+              <div className="space-y-2 pt-4 border-t">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <Label className="mb-1 block">Modalità Demo</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Visualizza dati simulati senza server
+                    </p>
+                  </div>
+                  <Button 
+                    variant={isDemoMode ? "destructive" : "outline"} 
+                    onClick={onToggleDemoMode}
+                    className="gap-2"
+                  >
+                    {isDemoMode ? (
+                      <>
+                        <AlertTriangle className="h-4 w-4" />
+                        Disattiva
+                      </>
+                    ) : (
+                      <>
+                        Attiva
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="metrics" className="space-y-4">
