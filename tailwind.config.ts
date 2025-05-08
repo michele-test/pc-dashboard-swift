@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,37 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom colors for our hardware monitoring dashboard
+				teal: {
+					DEFAULT: '#1ABC9C',
+					dark: '#16A085',
+					light: '#48C9B0'
+				},
+				blue: {
+					DEFAULT: '#3498DB',
+					dark: '#2980B9'
+				},
+				orange: {
+					DEFAULT: '#F39C12',
+					dark: '#D35400'
+				},
+				red: {
+					DEFAULT: '#E74C3C',
+					dark: '#C0392B'
+				},
+				green: {
+					DEFAULT: '#2ECC71',
+					dark: '#27AE60'
+				},
+				purple: {
+					DEFAULT: '#9B59B6',
+					dark: '#8E44AD'
+				},
+				darkblue: {
+					DEFAULT: '#2C3E50',
+					dark: '#1A1F2C',
+					light: '#34495E'
 				}
 			},
 			borderRadius: {
@@ -84,11 +116,21 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.5' },
+				},
+				'spin': {
+					from: { transform: 'rotate(0deg)' },
+					to: { transform: 'rotate(360deg)' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+				'spin': 'spin 1s linear infinite'
 			}
 		}
 	},
