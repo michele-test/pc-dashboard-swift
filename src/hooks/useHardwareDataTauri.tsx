@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { HardwareData } from "@/types/hardware";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api";
 
 interface UseHardwareDataTauriProps {
   refreshRate: number;
